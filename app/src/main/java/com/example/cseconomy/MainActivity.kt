@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity() {
 
         val items = sqlManager.getAllItems()
         val exchangeRates = sqlManager.getAllExchangeRates()
+        val favItems = sqlManager.getAllFavItems()
     }
 
     //vrati list predmetov v inventari uzivatela, 730 kod hry csgo

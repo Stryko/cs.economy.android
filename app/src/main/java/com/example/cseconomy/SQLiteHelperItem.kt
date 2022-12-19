@@ -28,6 +28,10 @@ class SQLiteHelperItem(context: Context) : SQLiteOpenHelper(context, DATABASE_NA
         private const val ER_BASE = "base"
         private const val ER_CURRENCY_TO = "currency_to"
         private const val ER_EXCHANGE_RATE = "exchange_rate"
+
+        private const val TABLE_FAV_ITEMS = "FavItem"
+        private const val FAV_ID = "id"
+        private const val FAV_ITEM_ID = "item_id"
     }
 
     override fun onCreate(p0: SQLiteDatabase?) {
@@ -48,13 +52,21 @@ class SQLiteHelperItem(context: Context) : SQLiteOpenHelper(context, DATABASE_NA
                     + ER_EXCHANGE_RATE + " REAL"
                 + ")")
 
+        val createTableFavItems = ("CREATE TABLE " + TABLE_FAV_ITEMS
+                + "("
+                + FAV_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + FAV_ITEM_ID + " INTEGER"
+                + ")")
+
         p0?.execSQL(createTableItems)
         p0?.execSQL(createTableExchangeRates)
+        p0?.execSQL(createTableFavItems)
     }
 
     override fun onUpgrade(p0: SQLiteDatabase?, p1: Int, p2: Int) {
         p0!!.execSQL("DROP TABLE IF EXISTS $TABLE_ITEMS")
         p0!!.execSQL("DROP TABLE IF EXISTS $TABLE_EXCHANGE_RATES")
+        p0!!.execSQL("DROP TABLE IF EXISTS $TABLE_FAV_ITEMS")
         onCreate(p0)
     }
 
@@ -266,5 +278,71 @@ class SQLiteHelperItem(context: Context) : SQLiteOpenHelper(context, DATABASE_NA
 
         return exchangeRatesList
     }
+
+    //Fav items
+    fun insertFavItem(itemId: Int): Long {
+        val db = this.writableDatabase
+
+        val contentValues = ContentValues()
+
+        contentValues.put(FAV_ITEM_ID, itemId)
+
+        val success = db.insert(TABLE_FAV_ITEMS,null, contentValues)
+        db.close()
+        return success
+    }
+
+    fun deleteFavItem(Id: Int): Int {
+        val db = this.writableDatabase
+
+        val success = db.delete(TABLE_FAV_ITEMS, "id=$Id", null)
+        db.close()
+        return success
+    }
+
+    fun deleteAllFavItems(): Int {
+        val db = this.writableDatabase
+
+        val success = db.delete(TABLE_FAV_ITEMS, "", null)
+        db.close()
+        return success
+    }
+
+    fun getAllFavItems(): ArrayList<ItemModel> {
+        val itemList: ArrayList<ItemModel> = ArrayList()
+        val selectQuery = "SELECT a.* FROM $TABLE_ITEMS a INNER JOIN $TABLE_FAV_ITEMS b ON a.id = b.item_id"
+        val db = this.readableDatabase
+
+        val cursor: Cursor?
+
+        try {
+            cursor = db.rawQuery(selectQuery, null)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            db.execSQL(selectQuery)
+            return ArrayList()
+        }
+
+        var id: Int
+        var name: String
+        var marketable: Boolean
+        var icon_url: String
+        var last_price: Float
+
+        if(cursor.moveToFirst())
+            do {
+                id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
+                name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
+                marketable = cursor.getString(cursor.getColumnIndexOrThrow("marketable")).toBoolean()
+                icon_url = cursor.getString(cursor.getColumnIndexOrThrow("icon_url"))
+                last_price = cursor.getString(cursor.getColumnIndexOrThrow("last_price")).toFloat()
+
+                val item = ItemModel(item_id = id, item_name = name, item_marketable = marketable, item_icon_url = icon_url, item_last_price = last_price)
+                itemList.add(item)
+            } while (cursor.moveToNext())
+
+        return itemList
+    }
+
 }
 
