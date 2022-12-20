@@ -10,7 +10,7 @@ import android.provider.ContactsContract
 import java.lang.Exception
 import java.lang.reflect.Executable
 
-class SQLiteHelperItem(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
         private const val DATABASE_NAME = "cs_economy.db"
@@ -345,4 +345,3 @@ class SQLiteHelperItem(context: Context) : SQLiteOpenHelper(context, DATABASE_NA
     }
 
 }
-

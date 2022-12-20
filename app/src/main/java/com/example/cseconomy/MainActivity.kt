@@ -11,7 +11,7 @@ import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var sqlManager: SQLiteHelperItem
+    private lateinit var sqlManager: SQLiteHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
             finish()
         }, 3000)
 
-        sqlManager = SQLiteHelperItem(this)
+        sqlManager = SQLiteHelper(this)
 
         //LoadItemsFromApi()
 
@@ -35,9 +35,9 @@ class MainActivity : AppCompatActivity() {
 
         //getInventoryItems()
 
-        val items = sqlManager.getAllItems()
-        val exchangeRates = sqlManager.getAllExchangeRates()
-        val favItems = sqlManager.getAllFavItems()
+        //val items = sqlManager.getAllItems()
+        //val exchangeRates = sqlManager.getAllExchangeRates()
+        //val favItems = sqlManager.getAllFavItems()
     }
 
     //vrati list predmetov v inventari uzivatela, 730 kod hry csgo
@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
 
     //vrati z api vsetky predmety pri nacitani aplikacie a updatuje si svoju databazu internu
     fun LoadItemsFromApi() {
-        val apiCallUrl = "http://csgoeconomy-api.somee.com/Items/3"
+        val apiCallUrl = "http://csgoeconomy-api.somee.com/Items/10"
 
         val request = Request.Builder().url(apiCallUrl).build()
 
