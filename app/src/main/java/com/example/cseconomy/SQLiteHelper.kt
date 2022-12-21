@@ -295,7 +295,7 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, 
     fun deleteFavItem(Id: Int): Int {
         val db = this.writableDatabase
 
-        val success = db.delete(TABLE_FAV_ITEMS, "id=$Id", null)
+        val success = db.delete(TABLE_FAV_ITEMS, "item_id=$Id", null)
         db.close()
         return success
     }
@@ -342,6 +342,29 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, 
             } while (cursor.moveToNext())
 
         return itemList
+    }
+
+    fun itemIsFavourite(itemId: Int): Boolean {
+        var result = false
+        val db = this.readableDatabase
+        val checkQuery = "SELECT * FROM $TABLE_FAV_ITEMS WHERE item_id='$itemId'"
+
+        val cursor: Cursor?
+
+        try {
+            cursor = db.rawQuery(checkQuery, null)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            db.execSQL(checkQuery)
+            return result
+        }
+
+        if(cursor.moveToFirst())
+            do {
+                result = true
+            } while (cursor.moveToNext())
+
+        return result
     }
 
 }

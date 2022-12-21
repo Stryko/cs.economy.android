@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AlertDialog
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -65,7 +66,24 @@ class SearchItemActivity : AppCompatActivity() {
 
         //pridanie do oblubenych
         adapter?.setOnClickAddFavItem {
-            //addItemToFavourite(it.item_id)
+            addItemToFavourite(it.item_id)
+        }
+    }
+
+    private fun addItemToFavourite(id:Int) {
+        if (sqliteHelper.itemIsFavourite(id))
+        {
+            Toast.makeText(this,"Item is already in favourite", Toast.LENGTH_SHORT).show()
+            return;
+        }
+
+        val status = sqliteHelper.insertFavItem(id)
+
+        if (status > -1) {
+            Toast.makeText(this,"Item added to favourite", Toast.LENGTH_SHORT).show()
+            //getItems()
+        } else {
+            Toast.makeText(this,"Failed adding item to favourite", Toast.LENGTH_SHORT).show()
         }
     }
 

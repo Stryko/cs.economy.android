@@ -7,12 +7,18 @@ import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.navigation.NavigationView
-
 
 class HomeActivity : AppCompatActivity() {
 
     lateinit var toggle : ActionBarDrawerToggle
+
+    private lateinit var recyclerView: RecyclerView
+
+    private var adapter:FavItemAdapter? = null
+    private lateinit var sqliteHelper: SQLiteHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +52,45 @@ class HomeActivity : AppCompatActivity() {
                 }
             }
             true
+        }
+
+        initView()
+        initRecycledView()
+
+        sqliteHelper = SQLiteHelper(this)
+
+        getItems()
+
+        //pridanie do oblubenych
+        adapter?.setOnClickRemoveFavItem {
+            removeItemFromFavourite(it.item_id)
+        }
+    }
+
+    private fun getItems() {
+        val itemsList = sqliteHelper.getAllFavItems()
+
+        adapter?.addItems(itemsList)
+    }
+
+    private fun initView() {
+        recyclerView = findViewById(R.id.recyclerViewFavItems)
+    }
+
+    private fun initRecycledView() {
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        adapter = FavItemAdapter()
+        recyclerView.adapter = adapter
+    }
+
+    private fun removeItemFromFavourite(id:Int) {
+        val status = sqliteHelper.deleteFavItem(id)
+
+        if (status > -1) {
+            Toast.makeText(this,"Item removed from favourite", Toast.LENGTH_SHORT).show()
+            getItems()
+        } else {
+            Toast.makeText(this,"Failed removing item", Toast.LENGTH_SHORT).show()
         }
     }
 

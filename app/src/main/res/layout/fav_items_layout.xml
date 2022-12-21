@@ -44,10 +44,10 @@
             tools:text="Price" />
 
         <ImageButton
-            android:id="@+id/btnAddFav"
+            android:id="@+id/btnRemoveFav"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_baseline_favorite_64"
+            android:src="@drawable/ic_baseline_delete_sweep_64"
             android:background="@null"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

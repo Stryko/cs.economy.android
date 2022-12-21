@@ -30,7 +30,6 @@ class MainActivity : AppCompatActivity() {
         sqlManager = SQLiteHelper(this)
 
         //LoadItemsFromApi()
-
         //LoadExchangeRatesFromApi()
 
         //getInventoryItems()
