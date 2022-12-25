@@ -11,7 +11,9 @@ import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var sqlManager: SQLiteHelper
+    private lateinit var sqlItemsManager: SQLiteItemHelper
+    private lateinit var sqlExchangeRatesManager: SQLiteExchangeRateHelper
+    private lateinit var sqlFavItemsManager: SQLiteFavItemHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,19 +29,21 @@ class MainActivity : AppCompatActivity() {
             finish()
         }, 3000)
 
-        sqlManager = SQLiteHelper(this)
+        sqlItemsManager = SQLiteItemHelper(this)
+        sqlExchangeRatesManager = SQLiteExchangeRateHelper(this)
+        sqlFavItemsManager = SQLiteFavItemHelper(this)
 
         LoadItemsFromApi()
-        //LoadExchangeRatesFromApi()
+        LoadExchangeRatesFromApi()
 
-        //val items = sqlManager.getAllItems()
-        //val exchangeRates = sqlManager.getAllExchangeRates()
-        //val favItems = sqlManager.getAllFavItems()
+        val items = sqlItemsManager.getAllItems(this,"Any","", 1000)
+        val exchangeRates = sqlExchangeRatesManager.getAllExchangeRates()
+        val favItems = sqlFavItemsManager.getAllFavItems(this)
     }
 
-    //vrati z api vsetky predmety pri nacitani aplikacie a updatuje si svoju databazu internu
+    //vrati z api vsetky predmety pri nacitani aplikacie a updatuje si svoju internu databazu
     fun LoadItemsFromApi() {
-        val apiCallUrl = "http://csgoeconomy-api.somee.com/Items/100"
+        val apiCallUrl = "http://csgoeconomy-api.somee.com/Items/200"
 
         val request = Request.Builder().url(apiCallUrl).build()
 
@@ -61,7 +65,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    //update kurzov
+    //update kurzov z vlastnej api
     fun LoadExchangeRatesFromApi() {
         val apiCallUrl = "http://csgoeconomy-api.somee.com/ExchangeRates"
 
@@ -94,10 +98,10 @@ class MainActivity : AppCompatActivity() {
             item_icon_url = it.iconUrl,
             item_last_price = it.lastPrice)
 
-            if (sqlManager.checkItemExists(it.name?.replace("'","''")))
-                sqlManager.updateItemByName(item)
+            if (sqlItemsManager.checkItemExists(it.name?.replace("'","''")))
+                sqlItemsManager.updateItemByName(item)
             else
-                sqlManager.insertItem(item)
+                sqlItemsManager.insertItem(item)
         }
     }
 
@@ -109,10 +113,10 @@ class MainActivity : AppCompatActivity() {
                 currency_to = it.currencyTo,
                 exchange_rate = it.exchangeRate1)
 
-            if (sqlManager.checkExchangeRateExists(it.currencyTo))
-                sqlManager.updateExchangeRateByCurrencyTo(rate)
+            if (sqlExchangeRatesManager.checkExchangeRateExists(it.currencyTo))
+                sqlExchangeRatesManager.updateExchangeRateByCurrencyTo(rate)
             else
-                sqlManager.insertExchangeRate(rate)
+                sqlExchangeRatesManager.insertExchangeRate(rate)
         }
     }
 }

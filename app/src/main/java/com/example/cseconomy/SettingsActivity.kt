@@ -3,18 +3,12 @@ package com.example.cseconomy
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
 import android.view.MenuItem
-import android.view.View
-import android.view.contentcapture.ContentCaptureCondition
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
-import android.widget.EditText
-import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.text.set
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.textfield.TextInputLayout
@@ -23,7 +17,10 @@ class SettingsActivity : AppCompatActivity() {
 
     lateinit var toggle : ActionBarDrawerToggle
 
-    private lateinit var sqliteHelper: SQLiteHelper
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var navigationView: NavigationView
+    private lateinit var textInputLayout: TextInputLayout
+    private lateinit var autoCompleteCurrency: AutoCompleteTextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,10 +28,7 @@ class SettingsActivity : AppCompatActivity() {
 
         setTitle("Settings")
 
-        sqliteHelper = SQLiteHelper(this)
-
-        val drawerLayout : DrawerLayout = findViewById(R.id.mainDrawerLayout)
-        val navView : NavigationView = findViewById(R.id.navView)
+        initElements()
 
         toggle = ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close)
 
@@ -43,7 +37,7 @@ class SettingsActivity : AppCompatActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        navView.setNavigationItemSelectedListener {
+        navigationView.setNavigationItemSelectedListener {
             when(it.itemId) {
                 R.id.nav_home ->
                 {
@@ -65,20 +59,26 @@ class SettingsActivity : AppCompatActivity() {
         setDropdownItems()
     }
 
+    fun initElements() {
+        drawerLayout = findViewById(R.id.mainDrawerLayout)
+        navigationView = findViewById(R.id.navView)
+        textInputLayout = findViewById(R.id.textInputLayout)
+        autoCompleteCurrency = findViewById(R.id.autoCompleteTextView)
+    }
+
+    //nastavenie dropdown menu pre menu(currency)
     fun setDropdownItems() {
         val sharedPreferences = getSharedPreferences("PREFERENCE_NAME", Context.MODE_PRIVATE)
         val currentUserCurrency = sharedPreferences.getString("user_currency","EUR")
 
         //nastavit aby sa zobrazoval text aktualnej meny...
-        val textInputLayout = findViewById<TextInputLayout>(R.id.textInputLayout)
         textInputLayout.editText?.setText(currentUserCurrency)
 
         val currencies = arrayOf("EUR","USD","CAD","JPY","GBP","NZD","CZK","HUF")
         val arrayAdapter = ArrayAdapter(this,R.layout.dropdown_item, currencies)
-        val autoComplete = findViewById<AutoCompleteTextView>(R.id.autoCompleteTextView)
-        autoComplete.setAdapter(arrayAdapter)
+        autoCompleteCurrency.setAdapter(arrayAdapter)
 
-        autoComplete.setOnItemClickListener { _, _, position, _ ->
+        autoCompleteCurrency.setOnItemClickListener { _, _, position, _ ->
             val value = arrayAdapter.getItem(position)
             changeCurrencySettings(value)
             Toast.makeText(applicationContext, "Currency changed to: $value", Toast.LENGTH_SHORT).show()

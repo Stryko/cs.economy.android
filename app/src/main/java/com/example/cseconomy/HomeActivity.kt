@@ -15,10 +15,12 @@ class HomeActivity : AppCompatActivity() {
 
     lateinit var toggle : ActionBarDrawerToggle
 
-    private lateinit var recyclerView: RecyclerView
-
     private var adapter:FavItemAdapter? = null
-    private lateinit var sqliteHelper: SQLiteHelper
+    private lateinit var sqliteFavItemHelper: SQLiteFavItemHelper
+
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var navigationView: NavigationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,8 +28,7 @@ class HomeActivity : AppCompatActivity() {
 
         setTitle("Home")
 
-        val drawerLayout : DrawerLayout = findViewById(R.id.mainDrawerLayout)
-        val navView : NavigationView = findViewById(R.id.navView)
+        initElements()
 
         toggle = ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close)
 
@@ -36,7 +37,7 @@ class HomeActivity : AppCompatActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        navView.setNavigationItemSelectedListener {
+        navigationView.setNavigationItemSelectedListener {
             when(it.itemId) {
                 R.id.nav_home -> Toast.makeText(applicationContext, "Home", Toast.LENGTH_SHORT).show()
                 R.id.nav_searchItems -> {
@@ -54,10 +55,9 @@ class HomeActivity : AppCompatActivity() {
             true
         }
 
-        initView()
         initRecycledView()
 
-        sqliteHelper = SQLiteHelper(this)
+        sqliteFavItemHelper = SQLiteFavItemHelper(this)
 
         getItems()
 
@@ -67,14 +67,17 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    private fun getItems() {
-        val itemsList = sqliteHelper.getAllFavItems(this)
-
-        adapter?.addItems(itemsList)
+    fun initElements() {
+        recyclerView = findViewById(R.id.recyclerViewFavItems)
+        drawerLayout = findViewById(R.id.mainDrawerLayout)
+        navigationView = findViewById(R.id.navView)
     }
 
-    private fun initView() {
-        recyclerView = findViewById(R.id.recyclerViewFavItems)
+    //vrati vsetky oblubene predmety
+    private fun getItems() {
+        val itemsList = sqliteFavItemHelper.getAllFavItems(this)
+
+        adapter?.addItems(itemsList)
     }
 
     private fun initRecycledView() {
@@ -83,8 +86,9 @@ class HomeActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
     }
 
+    //odstrani predmet z oblubenych a obnovi predmety
     private fun removeItemFromFavourite(id:Int) {
-        val status = sqliteHelper.deleteFavItem(id)
+        val status = sqliteFavItemHelper.deleteFavItem(id)
 
         if (status > -1) {
             Toast.makeText(this,"Item removed from favourite", Toast.LENGTH_SHORT).show()
