@@ -29,43 +29,17 @@ class MainActivity : AppCompatActivity() {
 
         sqlManager = SQLiteHelper(this)
 
-        //LoadItemsFromApi()
+        LoadItemsFromApi()
         //LoadExchangeRatesFromApi()
-
-        //getInventoryItems()
 
         //val items = sqlManager.getAllItems()
         //val exchangeRates = sqlManager.getAllExchangeRates()
         //val favItems = sqlManager.getAllFavItems()
     }
 
-    //vrati list predmetov v inventari uzivatela, 730 kod hry csgo
-    //aj na vlastnej api je nastavene zavolanie si vysledku inventaru z hry podle id uzivatela alebo podla uzivatelskeho mena
-    fun getInventoryItems() {
-        val apiCallUrl = "https://steamcommunity.com/profiles/76561198078598973/inventory/json/730/2"
-
-        val request = Request.Builder().url(apiCallUrl).build()
-
-        val client = OkHttpClient()
-        client.newCall(request).enqueue(object : Callback {
-            override fun onResponse(call: Call, response: Response) {
-                val body = response?.body?.string()?.replace("\"rgCurrency\":[],","")
-                println(body)
-
-                val gson = GsonBuilder().create()
-
-                val results = gson.fromJson(body, InventoryData::class.java)
-            }
-
-            override fun onFailure(call: Call, e: IOException) {
-                println("api call failed")
-            }
-        })
-    }
-
     //vrati z api vsetky predmety pri nacitani aplikacie a updatuje si svoju databazu internu
     fun LoadItemsFromApi() {
-        val apiCallUrl = "http://csgoeconomy-api.somee.com/Items/10"
+        val apiCallUrl = "http://csgoeconomy-api.somee.com/Items/100"
 
         val request = Request.Builder().url(apiCallUrl).build()
 
@@ -120,7 +94,7 @@ class MainActivity : AppCompatActivity() {
             item_icon_url = it.iconUrl,
             item_last_price = it.lastPrice)
 
-            if (sqlManager.checkItemExists(it.name))
+            if (sqlManager.checkItemExists(it.name?.replace("'","''")))
                 sqlManager.updateItemByName(item)
             else
                 sqlManager.insertItem(item)

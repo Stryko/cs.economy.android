@@ -68,7 +68,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun getItems() {
-        val itemsList = sqliteHelper.getAllFavItems()
+        val itemsList = sqliteHelper.getAllFavItems(this)
 
         adapter?.addItems(itemsList)
     }

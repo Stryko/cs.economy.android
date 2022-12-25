@@ -9,6 +9,8 @@ import android.media.MediaCodec
 import android.provider.ContactsContract
 import java.lang.Exception
 import java.lang.reflect.Executable
+import java.math.RoundingMode
+import java.text.DecimalFormat
 
 class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -113,7 +115,8 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, 
         contentValues.put(ITEM_ICON_URL, item.item_icon_url)
         contentValues.put(ITEM_LAST_PRICE, item.item_last_price)
 
-        val success = db.update(TABLE_ITEMS,contentValues,"name='" + item.item_name + "'", null)
+        val success = db.update(TABLE_ITEMS,contentValues,"name='"
+                + (item.item_name?.replace("'","''") ?: "") + "'", null)
         db.close()
         return success
     }
@@ -149,9 +152,14 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, 
         return success
     }
 
-    fun getAllItems(): ArrayList<ItemModel> {
+    fun getAllItems(context: Context, filterWeaponWear:String?, filterItemName:String): ArrayList<ItemModel> {
         val itemList: ArrayList<ItemModel> = ArrayList()
-        val selectQuery = "SELECT * FROM $TABLE_ITEMS"
+
+        var filterWeaponWearBD = filterWeaponWear
+        if(filterWeaponWear == "Any")
+            filterWeaponWearBD = ""
+
+        val selectQuery = "SELECT * FROM $TABLE_ITEMS WHERE name LIKE '%$filterWeaponWearBD%' AND name LIKE '%$filterItemName%' LIMIT 30"
         val db = this.readableDatabase
 
         val cursor: Cursor?
@@ -170,15 +178,22 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, 
         var icon_url: String
         var last_price: Float
 
+        val sharedPreferences = context.getSharedPreferences("PREFERENCE_NAME", Context.MODE_PRIVATE)
+        val userCurrency = sharedPreferences.getString("user_currency","EUR")
+        val currencyExchangeRate = getExchangeRateForCurrency(userCurrency)
+
+        val df = DecimalFormat("#.##")
+        df.roundingMode = RoundingMode.CEILING
+
         if(cursor.moveToFirst())
             do {
                 id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
                 name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
                 marketable = cursor.getString(cursor.getColumnIndexOrThrow("marketable")).toBoolean()
                 icon_url = cursor.getString(cursor.getColumnIndexOrThrow("icon_url"))
-                last_price = cursor.getString(cursor.getColumnIndexOrThrow("last_price")).toFloat()
+                last_price = df.format(cursor.getString(cursor.getColumnIndexOrThrow("last_price")).toFloat() * currencyExchangeRate).toFloat()
 
-                val item = ItemModel(item_id = id, item_name = name, item_marketable = marketable, item_icon_url = icon_url, item_last_price = last_price)
+                val item = ItemModel(item_id = id, item_name = name, item_marketable = marketable, item_icon_url = icon_url, item_last_price = last_price, currency = userCurrency)
                 itemList.add(item)
             } while (cursor.moveToNext())
 
@@ -245,6 +260,34 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, 
         return success
     }
 
+    fun getExchangeRateForCurrency(currency:String?) : Float
+    {
+        if (currency == "EUR")
+            return 1f
+
+        var exchange_rate = 0f
+        val selectQuery = "SELECT exchange_rate FROM $TABLE_EXCHANGE_RATES WHERE currency_to='$currency'"
+
+        val db = this.readableDatabase
+
+        val cursor: Cursor?
+
+        try {
+            cursor = db.rawQuery(selectQuery, null)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            db.execSQL(selectQuery)
+            return exchange_rate
+        }
+
+        if(cursor.moveToFirst())
+            do {
+                exchange_rate = cursor.getString(cursor.getColumnIndexOrThrow("exchange_rate")).toFloat()
+            } while (cursor.moveToNext())
+
+        return exchange_rate
+    }
+
     fun getAllExchangeRates(): ArrayList<ExchangeRateModel> {
         val exchangeRatesList: ArrayList<ExchangeRateModel> = ArrayList()
         val selectQuery = "SELECT * FROM $TABLE_EXCHANGE_RATES"
@@ -308,7 +351,7 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, 
         return success
     }
 
-    fun getAllFavItems(): ArrayList<ItemModel> {
+    fun getAllFavItems(context: Context): ArrayList<ItemModel> {
         val itemList: ArrayList<ItemModel> = ArrayList()
         val selectQuery = "SELECT a.* FROM $TABLE_ITEMS a INNER JOIN $TABLE_FAV_ITEMS b ON a.id = b.item_id"
         val db = this.readableDatabase
@@ -329,15 +372,22 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, 
         var icon_url: String
         var last_price: Float
 
+        val sharedPreferences = context.getSharedPreferences("PREFERENCE_NAME", Context.MODE_PRIVATE)
+        val userCurrency = sharedPreferences.getString("user_currency","EUR")
+        val currencyExchangeRate = getExchangeRateForCurrency(userCurrency)
+
+        val df = DecimalFormat("#.##")
+        df.roundingMode = RoundingMode.CEILING
+
         if(cursor.moveToFirst())
             do {
                 id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
                 name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
                 marketable = cursor.getString(cursor.getColumnIndexOrThrow("marketable")).toBoolean()
                 icon_url = cursor.getString(cursor.getColumnIndexOrThrow("icon_url"))
-                last_price = cursor.getString(cursor.getColumnIndexOrThrow("last_price")).toFloat()
+                last_price = df.format(cursor.getString(cursor.getColumnIndexOrThrow("last_price")).toFloat() * currencyExchangeRate).toFloat()
 
-                val item = ItemModel(item_id = id, item_name = name, item_marketable = marketable, item_icon_url = icon_url, item_last_price = last_price)
+                val item = ItemModel(item_id = id, item_name = name, item_marketable = marketable, item_icon_url = icon_url, item_last_price = last_price, currency = userCurrency)
                 itemList.add(item)
             } while (cursor.moveToNext())
 

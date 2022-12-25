@@ -1,16 +1,23 @@
 package com.example.cseconomy
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
 import android.view.MenuItem
+import android.view.View
+import android.view.contentcapture.ContentCaptureCondition
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
+import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.text.set
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.textfield.TextInputLayout
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -55,10 +62,35 @@ class SettingsActivity : AppCompatActivity() {
             true
         }
 
-        val languages = arrayOf("EUR","USD","CAD","JPY","GBP","NZD","CZK","HUF")
-        val arrayAdapter = ArrayAdapter(this,R.layout.dropdown_item, languages)
+        setDropdownItems()
+    }
+
+    fun setDropdownItems() {
+        val sharedPreferences = getSharedPreferences("PREFERENCE_NAME", Context.MODE_PRIVATE)
+        val currentUserCurrency = sharedPreferences.getString("user_currency","EUR")
+
+        //nastavit aby sa zobrazoval text aktualnej meny...
+        val textInputLayout = findViewById<TextInputLayout>(R.id.textInputLayout)
+        textInputLayout.editText?.setText(currentUserCurrency)
+
+        val currencies = arrayOf("EUR","USD","CAD","JPY","GBP","NZD","CZK","HUF")
+        val arrayAdapter = ArrayAdapter(this,R.layout.dropdown_item, currencies)
         val autoComplete = findViewById<AutoCompleteTextView>(R.id.autoCompleteTextView)
         autoComplete.setAdapter(arrayAdapter)
+
+        autoComplete.setOnItemClickListener { _, _, position, _ ->
+            val value = arrayAdapter.getItem(position)
+            changeCurrencySettings(value)
+            Toast.makeText(applicationContext, "Currency changed to: $value", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    //zmena meny uzivatela, ulozi sa do shared preferences
+    fun changeCurrencySettings(value:String?) {
+        val sharedPreferences = getSharedPreferences("PREFERENCE_NAME", Context.MODE_PRIVATE)
+        var editor = sharedPreferences.edit()
+        editor.putString("user_currency", value)
+        editor.commit()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

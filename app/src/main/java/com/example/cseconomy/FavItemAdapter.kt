@@ -53,7 +53,7 @@ class FavItemAdapter : RecyclerView.Adapter<FavItemAdapter.FavItemViewHolder>() 
         fun bindView(item:ItemModel) {
             val imageLink = "https://community.cloudflare.steamstatic.com/economy/image/" + item.item_icon_url
             name.text = item.item_name
-            price.text = item.item_last_price.toString()
+            price.text = "Price: " + item.item_last_price.toString() + " ${item.currency}"
             Picasso.get().load(imageLink).into(image)
         }
     }
