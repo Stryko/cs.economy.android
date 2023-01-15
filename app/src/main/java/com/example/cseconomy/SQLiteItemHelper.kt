@@ -135,12 +135,13 @@ class SQLiteItemHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NA
             return result
         }
 
-        if (cursor.moveToFirst())
+        if (cursor.moveToFirst()) {
             do {
                 result = true
             } while (cursor.moveToNext())
+        }
 
-            return result
+        return result
     }
 
     //premazanie tabulky
@@ -160,7 +161,7 @@ class SQLiteItemHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NA
         if(filterWeaponWear == "Any")
             filterWeaponWearBD = ""
 
-        val selectQuery = "SELECT * FROM $TABLE_ITEMS WHERE name LIKE '%$filterWeaponWearBD%' AND name LIKE '%$filterItemName%' LIMIT $limit"
+        val selectQuery = "SELECT * FROM $TABLE_ITEMS WHERE name LIKE '%$filterWeaponWearBD%' AND name LIKE '%$filterItemName%' LIMIT $limit ORDER BY $ITEM_NAME"
         val db = this.readableDatabase
 
         val cursor: Cursor?

@@ -36,14 +36,14 @@ class MainActivity : AppCompatActivity() {
         LoadItemsFromApi()
         LoadExchangeRatesFromApi()
 
-        val items = sqlItemsManager.getAllItems(this,"Any","", 1000)
-        val exchangeRates = sqlExchangeRatesManager.getAllExchangeRates()
-        val favItems = sqlFavItemsManager.getAllFavItems(this)
+        //val items = sqlItemsManager.getAllItems(this,"Any","", 1000)
+        //val exchangeRates = sqlExchangeRatesManager.getAllExchangeRates()
+        //val favItems = sqlFavItemsManager.getAllFavItems(this)
     }
 
     //vrati z api vsetky predmety pri nacitani aplikacie a updatuje si svoju internu databazu
     fun LoadItemsFromApi() {
-        val apiCallUrl = "http://csgoeconomy-api.somee.com/Items/200"
+        val apiCallUrl = "http://csgoeconomy-api.somee.com/Items/500"
 
         val request = Request.Builder().url(apiCallUrl).build()
 

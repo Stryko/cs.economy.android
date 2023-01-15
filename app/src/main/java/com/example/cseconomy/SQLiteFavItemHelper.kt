@@ -73,7 +73,7 @@ class SQLiteFavItemHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
     //vrati vsetky oblubene predmety
     fun getAllFavItems(context: Context): ArrayList<ItemModel> {
         val itemList: ArrayList<ItemModel> = ArrayList()
-        val selectQuery = "SELECT a.* FROM $TABLE_ITEM a INNER JOIN $TABLE_FAV_ITEMS b ON a.id = b.item_id"
+        val selectQuery = "SELECT a.* FROM $TABLE_ITEM a INNER JOIN $TABLE_FAV_ITEMS b ON a.id = b.item_id ORDER BY a.name"
         val db = this.readableDatabase
 
         val cursor: Cursor?

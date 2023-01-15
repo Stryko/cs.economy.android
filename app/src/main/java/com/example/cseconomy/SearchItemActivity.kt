@@ -207,7 +207,7 @@ class SearchItemActivity : AppCompatActivity() {
 
     //vrati vsetky predmety a zobrazi ich do rec. view pomocou adapteru
     private fun getItems() {
-        val itemsList = sqliteItemHelper.getAllItems(this, filterWeaponWearG, filterItemNameG, 20)
+        val itemsList = sqliteItemHelper.getAllItems(this, filterWeaponWearG, filterItemNameG, 100)
 
         adapter?.addItems(itemsList)
     }
